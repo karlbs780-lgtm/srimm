@@ -205,187 +205,328 @@ function openModal(modal) {
 
 function handleLogin(e) {
     e.preventDefault();
+    console.log('Tentative de connexion...');
     
-    const pseudo = document.getElementById('loginPseudo').value;
+    const pseudo = document.getElementById('loginPseudo').value.trim();
     const password = document.getElementById('loginPassword').value;
     
+    console.log('Pseudo recherché:', pseudo);
+    console.log('Utilisateurs disponibles:', users);
+    
+    // Rechercher l'utilisateur
     const user = users.find(u => u.username === pseudo && u.password === password);
     
     if (user) {
+        console.log('Utilisateur trouvé:', user);
         currentUser = user;
-        saveToLocalStorage('currentUser', currentUser);
-        showNotification('Connexion réussie!', 'success');
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        showNotification('Connexion réussie! Bienvenue ' + user.username, 'success');
         loginModal.style.display = 'none';
         loginForm.reset();
+        
+        // Recharger toutes les données et l'interface
         updateUI();
+        loadEvents();
+        loadRankings();
         loadUserEvents();
     } else {
+        console.log('Échec de connexion - utilisateur non trouvé');
         showNotification('Pseudo ou mot de passe incorrect', 'danger');
     }
 }
 
 function handleRegister(e) {
     e.preventDefault();
+    console.log('Tentative d\'inscription...');
     
-    const pseudo = document.getElementById('regPseudo').value;
+    const pseudo = document.getElementById('regPseudo').value.trim();
     const password = document.getElementById('regPassword').value;
     const rank = document.getElementById('regRank').value;
     
+    // Validation
+    if (!pseudo || !password || !rank) {
+        showNotification('Veuillez remplir tous les champs', 'warning');
+        return;
+    }
+    
+    if (pseudo.length < 3) {
+        showNotification('Le pseudo doit faire au moins 3 caractères', 'warning');
+        return;
+    }
+    
+    if (password.length < 3) {
+        showNotification('Le mot de passe doit faire au moins 3 caractères', 'warning');
+        return;
+    }
+    
     // Vérifier si l'utilisateur existe déjà
-    if (users.some(u => u.username === pseudo)) {
+    if (users.some(u => u.username.toLowerCase() === pseudo.toLowerCase())) {
         showNotification('Ce pseudo est déjà utilisé', 'warning');
         return;
     }
     
+    // Créer le nouvel utilisateur
+    const newUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+    
     const newUser = {
-        id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+        id: newUserId,
         username: pseudo,
         password: password,
         rank: rank,
         points: 0,
         matchesPlayed: 0,
-        starPlayer: false
+        starPlayer: false,
+        isAdmin: false
     };
     
+    console.log('Nouvel utilisateur créé:', newUser);
+    
+    // Ajouter à la liste des utilisateurs
     users.push(newUser);
     saveToLocalStorage('users', users);
     
-    // Ajouter au classement
-    rankings.push({
-        userId: newUser.id,
-        username: newUser.username,
+    // Créer l'entrée de classement
+    const newRanking = {
+        userId: newUserId,
+        username: pseudo,
         points: 0,
-        rank: newUser.rank,
+        rank: rank,
         matchesPlayed: 0,
         tier: "random"
-    });
+    };
     
+    rankings.push(newRanking);
     saveToLocalStorage('rankings', rankings);
     
     showNotification('Inscription réussie! Vous pouvez maintenant vous connecter.', 'success');
+    
+    // Fermer le modal et réinitialiser le formulaire
     registerModal.style.display = 'none';
     registerForm.reset();
     
+    console.log('Utilisateurs après inscription:', users);
+    console.log('Classement après inscription:', rankings);
+    
     // Ouvrir automatiquement le modal de connexion
-    setTimeout(() => openModal(loginModal), 500);
+    setTimeout(() => {
+        loginModal.style.display = 'flex';
+        // Pré-remplir le pseudo
+        document.getElementById('loginPseudo').value = pseudo;
+        document.getElementById('loginPassword').focus();
+    }, 500);
 }
 
 function updateUI() {
+    console.log('Mise à jour de l\'interface, utilisateur actuel:', currentUser);
+    
     const authButtons = document.querySelector('.auth-buttons');
+    const authButtonsMobile = document.querySelector('.auth-buttons-mobile');
     const profileUsername = document.getElementById('profileUsername');
     const profileRank = document.getElementById('profileRank');
     const profilePoints = document.getElementById('profilePoints');
     
     if (currentUser) {
-        // Mettre à jour les boutons d'authentification
-        authButtons.innerHTML = `
-            <span style="color: white; margin-right: 10px;">Bonjour, ${currentUser.username}</span>
-            <button id="logoutBtn" class="btn btn-outline">Déconnexion</button>
-        `;
+        console.log('Utilisateur connecté:', currentUser.username);
         
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        // Mettre à jour les boutons d'authentification desktop
+        if (authButtons) {
+            authButtons.innerHTML = `
+                <span style="color: white; margin-right: 10px; display: flex; align-items: center;">
+                    <i class="fas fa-user" style="margin-right: 5px;"></i>
+                    ${currentUser.username}
+                </span>
+                <button id="logoutBtn" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            `;
+            
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        }
+        
+        // Mettre à jour les boutons mobiles
+        if (authButtonsMobile) {
+            authButtonsMobile.innerHTML = `
+                <span style="color: white; margin-right: 10px; font-size: 0.9rem;">
+                    ${currentUser.username}
+                </span>
+                <button id="logoutBtnMobile" class="btn btn-outline btn-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            `;
+            
+            document.getElementById('logoutBtnMobile').addEventListener('click', handleLogout);
+        }
         
         // Mettre à jour le profil
-        profileUsername.textContent = currentUser.username;
-        profileRank.textContent = `Rang: ${currentUser.rank}`;
-        profilePoints.textContent = `Points: ${currentUser.points || 0}`;
+        if (profileUsername) profileUsername.textContent = currentUser.username;
+        if (profileRank) profileRank.textContent = `Rang: ${currentUser.rank}`;
+        if (profilePoints) profilePoints.textContent = `Points: ${currentUser.points || 0}`;
         
         // Afficher les actions du profil
-        profileActions.innerHTML = `
-            <h4>Modifier le profil</h4>
-            <form id="editProfileForm" class="profile-form">
-                <div class="form-group">
-                    <label for="editRank">Changer de rang</label>
-                    <select id="editRank">
-                        <option value="Iron">Fer</option>
-                        <option value="Bronze">Bronze</option>
-                        <option value="Silver">Argent</option>
-                        <option value="Gold">Or</option>
-                        <option value="Platinum">Platine</option>
-                        <option value="Diamond">Diamant</option>
-                        <option value="Master">Maître</option>
-                        <option value="Grandmaster">Grand Maître</option>
-                        <option value="Challenger">Challenger</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editPassword">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
-                    <input type="password" id="editPassword">
-                </div>
-                <button type="submit" class="btn btn-primary">Mettre à jour</button>
-            </form>
-        `;
-        
-        // Événement pour le formulaire de modification
-        document.getElementById('editProfileForm')?.addEventListener('submit', handleProfileUpdate);
+        if (profileActions) {
+            profileActions.innerHTML = `
+                <h4>Modifier le profil</h4>
+                <form id="editProfileForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="editRank">Changer de rang</label>
+                        <select id="editRank">
+                            <option value="Iron" ${currentUser.rank === 'Iron' ? 'selected' : ''}>Fer</option>
+                            <option value="Bronze" ${currentUser.rank === 'Bronze' ? 'selected' : ''}>Bronze</option>
+                            <option value="Silver" ${currentUser.rank === 'Silver' ? 'selected' : ''}>Argent</option>
+                            <option value="Gold" ${currentUser.rank === 'Gold' ? 'selected' : ''}>Or</option>
+                            <option value="Platinum" ${currentUser.rank === 'Platinum' ? 'selected' : ''}>Platine</option>
+                            <option value="Diamond" ${currentUser.rank === 'Diamond' ? 'selected' : ''}>Diamant</option>
+                            <option value="Master" ${currentUser.rank === 'Master' ? 'selected' : ''}>Maître</option>
+                            <option value="Grandmaster" ${currentUser.rank === 'Grandmaster' ? 'selected' : ''}>Grand Maître</option>
+                            <option value="Challenger" ${currentUser.rank === 'Challenger' ? 'selected' : ''}>Challenger</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPassword">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+                        <input type="password" id="editPassword" placeholder="Nouveau mot de passe">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirmer le mot de passe">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </form>
+            `;
+            
+            // Événement pour le formulaire de modification
+            document.getElementById('editProfileForm')?.addEventListener('submit', handleProfileUpdate);
+        }
         
         // Charger les événements de l'utilisateur
         loadUserEvents();
-    } else {
-        // Réinitialiser l'interface pour un utilisateur non connecté
-        authButtons.innerHTML = `
-            <button id="loginBtn" class="btn btn-outline">Connexion</button>
-            <button id="registerBtn" class="btn btn-primary">Inscription</button>
-        `;
         
-        // Réinitialiser les écouteurs d'événements
-        document.getElementById('loginBtn').addEventListener('click', () => openModal(loginModal));
-        document.getElementById('registerBtn').addEventListener('click', () => openModal(registerModal));
+    } else {
+        console.log('Aucun utilisateur connecté');
+        
+        // Réinitialiser l'interface pour un utilisateur non connecté
+        if (authButtons) {
+            authButtons.innerHTML = `
+                <button id="loginBtn" class="btn btn-outline">Connexion</button>
+                <button id="registerBtn" class="btn btn-primary">Inscription</button>
+            `;
+        }
+        
+        if (authButtonsMobile) {
+            authButtonsMobile.innerHTML = `
+                <button id="loginBtnMobile" class="btn btn-outline btn-sm">Connexion</button>
+                <button id="registerBtnMobile" class="btn btn-primary btn-sm">Inscription</button>
+            `;
+        }
         
         // Réinitialiser le profil
-        profileUsername.textContent = "Non connecté";
-        profileRank.textContent = "Rang: -";
-        profilePoints.textContent = "Points: 0";
-        profileActions.innerHTML = `<p>Connectez-vous pour voir votre profil</p>`;
-        userEvents.innerHTML = `<p>Connectez-vous pour voir vos événements</p>`;
+        if (profileUsername) profileUsername.textContent = "Non connecté";
+        if (profileRank) profileRank.textContent = "Rang: -";
+        if (profilePoints) profilePoints.textContent = "Points: 0";
+        
+        if (profileActions) {
+            profileActions.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-user-circle" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                    <p>Connectez-vous pour accéder à votre profil</p>
+                    <button id="profileLoginBtn" class="btn btn-primary" style="margin-top: 1rem;">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('profileLoginBtn')?.addEventListener('click', () => {
+                openModal(loginModal);
+            });
+        }
+        
+        if (userEvents) {
+            userEvents.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Connectez-vous pour voir vos événements</p>
+                </div>
+            `;
+        }
     }
     
-    // Mettre à jour le classement
-    loadRankings();
+    // Réinitialiser les écouteurs d'événements
+    setupEventListeners();
 }
 
 function handleLogout() {
-    currentUser = null;
-    saveToLocalStorage('currentUser', null);
-    showNotification('Déconnexion réussie', 'info');
-    updateUI();
+    console.log('Déconnexion en cours...');
+    
+    // Confirmer la déconnexion
+    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        
+        showNotification('Déconnexion réussie', 'info');
+        
+        // Recharger l'interface
+        updateUI();
+        loadEvents();
+        loadRankings();
+    }
 }
-
 function handleProfileUpdate(e) {
     e.preventDefault();
     
-    if (!currentUser) return;
+    if (!currentUser) {
+        showNotification('Vous devez être connecté pour modifier votre profil', 'warning');
+        return;
+    }
     
     const newRank = document.getElementById('editRank').value;
     const newPassword = document.getElementById('editPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     
-    // Mettre à jour l'utilisateur
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
-    if (userIndex !== -1) {
-        users[userIndex].rank = newRank;
-        if (newPassword) {
-            users[userIndex].password = newPassword;
-        }
-        
-        // Mettre à jour le classement
-        const rankIndex = rankings.findIndex(r => r.userId === currentUser.id);
-        if (rankIndex !== -1) {
-            rankings[rankIndex].rank = newRank;
-        }
-        
-        // Mettre à jour l'utilisateur courant
-        currentUser.rank = newRank;
-        if (newPassword) {
-            currentUser.password = newPassword;
-        }
-        
-        saveToLocalStorage('users', users);
-        saveToLocalStorage('rankings', rankings);
-        saveToLocalStorage('currentUser', currentUser);
-        
-        showNotification('Profil mis à jour avec succès', 'success');
-        updateUI();
+    // Vérifier la confirmation du mot de passe
+    if (newPassword && newPassword !== confirmPassword) {
+        showNotification('Les mots de passe ne correspondent pas', 'danger');
+        return;
     }
+    
+    // Trouver l'utilisateur dans la liste
+    const userIndex = users.findIndex(u => u.id === currentUser.id);
+    if (userIndex === -1) {
+        showNotification('Utilisateur non trouvé', 'danger');
+        return;
+    }
+    
+    // Mettre à jour les informations
+    users[userIndex].rank = newRank;
+    
+    if (newPassword && newPassword.length >= 3) {
+        users[userIndex].password = newPassword;
+    }
+    
+    // Mettre à jour le classement
+    const rankIndex = rankings.findIndex(r => r.userId === currentUser.id);
+    if (rankIndex !== -1) {
+        rankings[rankIndex].rank = newRank;
+    }
+    
+    // Mettre à jour l'utilisateur courant
+    currentUser.rank = newRank;
+    if (newPassword && newPassword.length >= 3) {
+        currentUser.password = newPassword;
+    }
+    
+    // Sauvegarder
+    saveToLocalStorage('users', users);
+    saveToLocalStorage('rankings', rankings);
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    showNotification('Profil mis à jour avec succès', 'success');
+    
+    // Réinitialiser le formulaire
+    document.getElementById('editPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    
+    // Mettre à jour l'interface
+    updateUI();
 }
 
 function loadEvents() {
@@ -984,4 +1125,5 @@ window.unregisterFromEvent = unregisterFromEvent;
 window.viewEventMatches = viewEventMatches;
 
 window.recordMatchResult = recordMatchResult;
+
 
