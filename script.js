@@ -854,10 +854,89 @@ function showNotification(message, type) {
 function saveToLocalStorage(key, data) {
     localStorage.setItem(`gamingCommunity${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(data));
 }
+// ===========================================
+// FONCTIONS RESPONSIVE - À AJOUTER À LA FIN
+// ===========================================
+
+// Gestion du menu hamburger
+function setupHamburgerMenu() {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (!hamburger || !navMenu) return;
+    
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+    
+    // Fermer le menu en cliquant sur un lien
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+        });
+    });
+    
+    // Boutons mobiles
+    const loginBtnMobile = document.getElementById('loginBtnMobile');
+    const registerBtnMobile = document.getElementById('registerBtnMobile');
+    
+    if (loginBtnMobile) {
+        loginBtnMobile.addEventListener('click', () => openModal(loginModal));
+    }
+    
+    if (registerBtnMobile) {
+        registerBtnMobile.addEventListener('click', () => openModal(registerModal));
+    }
+}
+
+// Gestion du redimensionnement
+function handleResize() {
+    const navMenu = document.querySelector('.nav-menu');
+    const hamburger = document.querySelector('.hamburger');
+    
+    // Fermer le menu hamburger sur desktop
+    if (window.innerWidth > 768 && navMenu && hamburger) {
+        navMenu.classList.remove('active');
+        hamburger.classList.remove('active');
+    }
+}
+
+// Fonction debounce pour optimiser les performances
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ===========================================
+// MODIFICATION DE LA FONCTION EXISTANTE
+// ===========================================
+
+// DANS la fonction setupEventListeners(), AJOUTER cet appel :
+function setupEventListeners() {
+    // ... votre code existant ...
+    
+    // AJOUTER CETTE LIGNE à la fin de la fonction :
+    setupHamburgerMenu();
+}
+
+// AJOUTER cette ligne à la fin du fichier (après toutes les fonctions) :
+// Écouter le redimensionnement
+window.addEventListener('resize', debounce(handleResize, 250));
 
 // Exposer les fonctions globales
 window.openModal = openModal;
 window.registerToEvent = registerToEvent;
 window.unregisterFromEvent = unregisterFromEvent;
 window.viewEventMatches = viewEventMatches;
+
 window.recordMatchResult = recordMatchResult;
