@@ -11,33 +11,42 @@
 <body>
     <div class="admin-container">
         <aside class="admin-sidebar">
-            <div class="admin-logo">
-                <i class="fas fa-gamepad"></i>
-                <span>Admin Panel</span>
-            </div>
-            <nav class="admin-nav">
-                <a href="#dashboard" class="admin-nav-link active">
-                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
-                </a>
-                <a href="#users" class="admin-nav-link">
-                    <i class="fas fa-users"></i> Utilisateurs
-                </a>
-                <a href="#events" class="admin-nav-link">
-                    <i class="fas fa-calendar-alt"></i> Événements
-                </a>
-                <a href="#ranking" class="admin-nav-link">
-                    <i class="fas fa-trophy"></i> Classement
-                </a>
-                <a href="#settings" class="admin-nav-link">
-                    <i class="fas fa-cog"></i> Paramètres
-                </a>
-            </nav>
-            <div class="admin-footer">
-                <a href="../index.html" class="btn btn-outline">
-                    <i class="fas fa-arrow-left"></i> Retour au site
-                </a>
-            </div>
-        </aside>
+    <div class="admin-logo">
+        <i class="fas fa-gamepad"></i>
+        <span>Admin Panel</span>
+    </div>
+    
+    <!-- Bouton hamburger pour mobile -->
+    <div class="admin-hamburger show-on-mobile">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <nav class="admin-nav">
+        <a href="#dashboard" class="admin-nav-link active">
+            <i class="fas fa-tachometer-alt"></i> Tableau de bord
+        </a>
+        <a href="#users" class="admin-nav-link">
+            <i class="fas fa-users"></i> Utilisateurs
+        </a>
+        <a href="#events" class="admin-nav-link">
+            <i class="fas fa-calendar-alt"></i> Événements
+        </a>
+        <a href="#ranking" class="admin-nav-link">
+            <i class="fas fa-trophy"></i> Classement
+        </a>
+        <a href="#settings" class="admin-nav-link">
+            <i class="fas fa-cog"></i> Paramètres
+        </a>
+    </nav>
+    
+    <div class="admin-footer hide-on-mobile">
+        <a href="../index.html" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Retour au site
+        </a>
+    </div>
+</aside>
         
         <main class="admin-main">
             <header class="admin-header">
@@ -219,3 +228,4 @@
 </body>
 
 </html>
+
