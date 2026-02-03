@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Community Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-gamepad"></i>
+                <span>Gaming Community</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="#events" class="nav-link"><i class="fas fa-calendar-alt"></i> Événements</a></li>
+                <li><a href="#ranking" class="nav-link"><i class="fas fa-trophy"></i> Classement</a></li>
+                <li><a href="#profile" class="nav-link"><i class="fas fa-user"></i> Profil</a></li>
+                <li><a href="admin/index.html" class="nav-link admin-btn"><i class="fas fa-cogs"></i> Admin</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <button id="loginBtn" class="btn btn-outline">Connexion</button>
+                <button id="registerBtn" class="btn btn-primary">Inscription</button>
+            </div>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modals -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-sign-in-alt"></i> Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginPseudo">Pseudo</label>
+                    <input type="text" id="loginPseudo" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-user-plus"></i> Inscription</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regPseudo">Pseudo</label>
+                    <input type="text" id="regPseudo" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Mot de passe</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="regRank">Rang en classé</label>
+                    <select id="regRank" required>
+                        <option value="">Sélectionnez un rang</option>
+                        <option value="Iron">Fer</option>
+                        <option value="Bronze">Bronze</option>
+                        <option value="Silver">Argent</option>
+                        <option value="Gold">Or</option>
+                        <option value="Platinum">Platine</option>
+                        <option value="Diamond">Diamant</option>
+                        <option value="Master">Maître</option>
+                        <option value="Grandmaster">Grand Maître</option>
+                        <option value="Challenger">Challenger</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Gérez votre communauté gaming</h1>
+                <p>Organisez des événements, créez des matchs équilibrés et suivez le classement de vos joueurs.</p>
+                <div class="hero-buttons">
+                    <button id="viewEventsBtn" class="btn btn-primary">Voir les événements</button>
+                    <button id="viewRankingBtn" class="btn btn-outline">Voir le classement</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Gaming Community">
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="events" class="section">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Événements à venir</h2>
+            <div class="events-container" id="eventsContainer">
+                <!-- Les événements seront chargés dynamiquement ici -->
+            </div>
+        </section>
+
+        <!-- Ranking Section -->
+        <section id="ranking" class="section">
+            <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des joueurs</h2>
+            <div class="ranking-tiers">
+                <div class="tier tier-s">
+                    <h3><i class="fas fa-crown"></i> Tier S (Top 3)</h3>
+                    <div id="tierS" class="tier-players">
+                        <!-- Les joueurs Tier S seront chargés ici -->
+                    </div>
+                </div>
+                <div class="tier tier-a">
+                    <h3><i class="fas fa-medal"></i> Tier A (4-6)</h3>
+                    <div id="tierA" class="tier-players">
+                        <!-- Les joueurs Tier A seront chargés ici -->
+                    </div>
+                </div>
+                <div class="tier tier-b">
+                    <h3><i class="fas fa-award"></i> Tier B (7-10)</h3>
+                    <div id="tierB" class="tier-players">
+                        <!-- Les joueurs Tier B seront chargés ici -->
+                    </div>
+                </div>
+                <div class="tier tier-random">
+                    <h3><i class="fas fa-users"></i> Random (11+)</h3>
+                    <div id="tierRandom" class="tier-players">
+                        <!-- Les joueurs Random seront chargés ici -->
+                    </div>
+                </div>
+            </div>
+            <div class="full-ranking">
+                <h3>Classement complet</h3>
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Pseudo</th>
+                            <th>Points</th>
+                            <th>Rang</th>
+                            <th>Tier</th>
+                            <th>Matchs joués</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingTable">
+                        <!-- Le classement complet sera chargé ici -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <h2 class="section-title"><i class="fas fa-user"></i> Mon Profil</h2>
+            <div class="profile-container">
+                <div class="profile-card" id="profileCard">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profileUsername">Non connecté</h3>
+                            <p id="profileRank">Rang: -</p>
+                            <p id="profilePoints">Points: 0</p>
+                        </div>
+                    </div>
+                    <div class="profile-actions" id="profileActions">
+                        <p>Connectez-vous pour voir votre profil</p>
+                    </div>
+                </div>
+                
+                <div class="profile-events">
+                    <h3>Mes événements</h3>
+                    <div id="userEvents">
+                        <!-- Les événements de l'utilisateur seront chargés ici -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notifications -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Gaming Community Manager</h3>
+                <p>Plateforme de gestion de communauté gaming</p>
+            </div>
+            <div class="footer-section">
+                <h3>Fonctionnalités</h3>
+                <ul>
+                    <li>Gestion des joueurs</li>
+                    <li>Création d'événements</li>
+                    <li>Matchmaking équilibré</li>
+                    <li>Système de classement</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>support@gamingcommunity.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Gaming Community Manager. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
