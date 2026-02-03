@@ -1,23 +1,60 @@
 // Données initiales (à remplacer par une base de données réelle)
-let users = JSON.parse(localStorage.getItem('gamingCommunityUsers')) || [];
-let events = JSON.parse(localStorage.getItem('gamingCommunityEvents')) || [];
-let rankings = JSON.parse(localStorage.getItem('gamingCommunityRankings')) || [];
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+let users = [];
+let events = [];
+let rankings = [];
+let currentUser = null;
 
-// Initialisation des données de démonstration si vide
-if (users.length === 0) {
-    users = [
-        { id: 1, username: "Player1", password: "123", rank: "Diamond", points: 150, matchesPlayed: 15, starPlayer: false },
-        { id: 2, username: "Player2", password: "123", rank: "Platinum", points: 120, matchesPlayed: 12, starPlayer: false },
-        { id: 3, username: "Player3", password: "123", rank: "Gold", points: 100, matchesPlayed: 10, starPlayer: true },
-        { id: 4, username: "Player4", password: "123", rank: "Silver", points: 80, matchesPlayed: 8, starPlayer: false },
-        { id: 5, username: "Player5", password: "123", rank: "Bronze", points: 60, matchesPlayed: 6, starPlayer: false },
-        { id: 6, username: "Player6", password: "123", rank: "Iron", points: 40, matchesPlayed: 4, starPlayer: false }
-    ];
-    saveToLocalStorage('users', users);
+// Fonction pour charger depuis localStorage
+function loadFromLocalStorage() {
+    try {
+        users = JSON.parse(localStorage.getItem('gamingCommunityUsers')) || [];
+        events = JSON.parse(localStorage.getItem('gamingCommunityEvents')) || [];
+        rankings = JSON.parse(localStorage.getItem('gamingCommunityRankings')) || [];
+        currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        
+        // Si aucun utilisateur, créer un admin par défaut
+        if (users.length === 0) {
+            initializeDefaultData();
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement depuis localStorage:', error);
+        initializeDefaultData();
+    }
 }
 
-if (events.length === 0) {
+// Fonction pour initialiser les données par défaut
+function initializeDefaultData() {
+    users = [
+        { 
+            id: 1, 
+            username: "Admin", 
+            password: "admin123", 
+            rank: "Diamond", 
+            points: 0, 
+            matchesPlayed: 0, 
+            starPlayer: true,
+            isAdmin: true 
+        },
+        { 
+            id: 2, 
+            username: "Player1", 
+            password: "123", 
+            rank: "Gold", 
+            points: 100, 
+            matchesPlayed: 10, 
+            starPlayer: false 
+        },
+        { 
+            id: 3, 
+            username: "Player2", 
+            password: "123", 
+            rank: "Silver", 
+            points: 80, 
+            matchesPlayed: 8, 
+            starPlayer: false 
+        }
+    ];
+    
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -29,26 +66,13 @@ if (events.length === 0) {
             description: "Tournoi compétitif avec matchmaking équilibré", 
             date: tomorrow.toISOString(), 
             maxPlayers: 12,
-            registeredPlayers: [1, 3, 4, 6],
-            status: "open", // open, closed, in-progress, finished
-            matches: []
-        },
-        { 
-            id: 2, 
-            title: "Soirée Fun", 
-            description: "Jeux décontractés pour tous les niveaux", 
-            date: new Date(now.getTime() + 3*24*60*60*1000).toISOString(), 
-            maxPlayers: 18,
-            registeredPlayers: [2, 5],
+            registeredPlayers: [1, 3],
             status: "open",
             matches: []
         }
     ];
-    saveToLocalStorage('events', events);
-}
-
-if (rankings.length === 0) {
-    // Générer le classement à partir des utilisateurs
+    
+    // Générer le classement
     rankings = users.map(user => ({
         userId: user.id,
         username: user.username,
@@ -58,7 +82,27 @@ if (rankings.length === 0) {
         tier: calculateTier(user.points || 0, users)
     })).sort((a, b) => b.points - a.points);
     
+    saveAllToLocalStorage();
+}
+
+// Fonction de sauvegarde unifiée
+function saveToLocalStorage(key, data) {
+    try {
+        localStorage.setItem(`gamingCommunity${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(data));
+        console.log(`Données "${key}" sauvegardées:`, data);
+    } catch (error) {
+        console.error(`Erreur lors de la sauvegarde de "${key}":`, error);
+    }
+}
+
+// Fonction pour sauvegarder toutes les données
+function saveAllToLocalStorage() {
+    saveToLocalStorage('users', users);
+    saveToLocalStorage('events', events);
     saveToLocalStorage('rankings', rankings);
+    if (currentUser) {
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
 }
 
 // DOM Elements
@@ -940,3 +984,4 @@ window.unregisterFromEvent = unregisterFromEvent;
 window.viewEventMatches = viewEventMatches;
 
 window.recordMatchResult = recordMatchResult;
+
