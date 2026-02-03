@@ -514,6 +514,46 @@ function showNotificationAdmin(message, type) {
 function saveToLocalStorage(key, data) {
     localStorage.setItem(`gamingCommunity${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(data));
 }
+// ===========================================
+// FONCTIONS RESPONSIVE ADMIN - À AJOUTER
+// ===========================================
+
+function setupAdminResponsive() {
+    // Menu hamburger admin
+    const adminHamburger = document.querySelector('.admin-hamburger');
+    const adminNav = document.querySelector('.admin-nav');
+    
+    if (adminHamburger && adminNav) {
+        adminHamburger.addEventListener('click', () => {
+            adminNav.classList.toggle('active');
+        });
+        
+        // Fermer le menu en cliquant sur un lien
+        const adminNavLinks = document.querySelectorAll('.admin-nav-link');
+        adminNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                adminNav.classList.remove('active');
+            });
+        });
+    }
+    
+    // Gestion du redimensionnement pour admin
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 576 && adminNav) {
+            adminNav.classList.remove('active');
+        }
+    });
+}
+
+// AJOUTER cet appel dans DOMContentLoaded :
+document.addEventListener('DOMContentLoaded', () => {
+    loadAdminDashboard();
+    loadUsersTable();
+    loadEventsAdmin();
+    loadRankingAdmin();
+    setupAdminEventListeners();
+    setupAdminResponsive(); // <-- AJOUTER CETTE LIGNE
+});
 
 // Exposer les fonctions globales
 window.toggleStarPlayer = toggleStarPlayer;
@@ -522,4 +562,5 @@ window.deleteUser = deleteUser;
 window.viewEventDetails = viewEventDetails;
 window.editEvent = editEvent;
 window.deleteEvent = deleteEvent;
+
 window.updatePlayerPoints = updatePlayerPoints;
